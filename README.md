@@ -1,6 +1,9 @@
 Using Git
 ===============
 
+Global Settings
+-----------
+
 ```
 git config --global user.name "Amol Mishra"
 git config --global user.email="amol.mishra@netapp.com"
@@ -78,6 +81,9 @@ For particular file(to remove it off from staging area):
 For particular file, to go back to previous commit
 `git checkout -- file.txt`
 
+For particular file, to go back to specific commit
+`git checkout c5f567 -- file1/to/restore file2/to/restore`
+
 Go back to commit:
 `git revert 073791e7dd71b90daa853b2c5acc2c925f02dbc6`
 
@@ -95,6 +101,57 @@ Hard reset (move HEAD and change staging dir and working dir to match repo):
 Hard reset of a single file (`@` is short for `HEAD`):
 `git checkout @ -- index.html`
 
+Create a new commit based on previous commit:
+```
+git reset --hard 56e05fced
+git reset --soft HEAD@{1}
+git commit -m "Revert to 56e05fced"
+```
+
+Undo most recent commit in git
+```
+git reset --hard HEAD~1
+git reset HEAD~1
+git reset --soft HEAD~1
+```
+
+Reverting to previous commit, different ways: 
+1. Temporary switch to different branch: `git checkout -b old-state 0249023493`
+2. Hard delete unpublished commits:
+```
+git stash
+git reset --hard 0d1d7fc32
+git stash pop
+```
+3. Undo published commits with new commits
+```
+# This will create three separate revert commits:
+git revert a867b4af 25eee4ca 0766c053
+
+# It also takes ranges. This will revert the last two commits:
+git revert HEAD~2..HEAD
+
+#Similarly, you can revert a range of commits using commit hashes:
+git revert a867b4af..0766c053
+```
+List of deleted commits: 
+`git reflog`
+
+Checkout to previously deleted commit:
+`git checkout -b someNewBranchName shaYouDestroyed`
+
+Force git pull to overwrite the current files:
+```
+git fetch --all
+git reset --hard origin/<branch_name>
+```
+
+Moving the most recent commits to a new branch
+```
+git branch newbranch      
+git reset --hard HEAD~3   
+git checkout newbranch
+```
 Update & Delete
 -----------
 
@@ -108,7 +165,10 @@ Unstage (undo adds):
 `git reset HEAD index.html`
 
 Update most recent commit (also update the commit message):
-`git commit --amend -m "New Message"`
+```
+git commit --amend -m "New Message"
+git push origin master --force
+```
 
 
 Branch
@@ -225,7 +285,11 @@ Delete complete stash:
 Stash untracked files:
 `git stash -u`
 
-
+Create a new branch based on stash:
+```
+git stash
+git stash branch <new-branch> stash@{0}
+```
 
 Gitignore & Gitkeep
 -----------
@@ -354,12 +418,15 @@ Show all released versions:
 `git tag`
 
 Show all released versions with comments:
-`git tag -l -n1`
+```
+git tag -l -n1
+git tag -l "v1.8.5*"
+```
 
-Create release version:
+Create release version: (REGULAR TAG)
 `git tag v1.0.0`
 
-Create release version with comment:
+Create release version with comment: (ANNOTATED TAG)
 `git tag -a v1.0.0 -m 'Message'`
 
 Checkout a specific release version:
@@ -367,6 +434,9 @@ Checkout a specific release version:
 
 Force it to another commit ID
 `git tag -a v2.0 -f bd35d46`
+
+Deleting a specific tag
+`git tag -d v1.4-lw`
 
 Push specific tag to github
 `git push origin v-0.9-beta`
@@ -377,6 +447,12 @@ Push all the tags onto remote
 Delete a specific tag from remote
 `git push origin :v-0.8-alpha`
 
+See more details about the tag
+`git show v1.2`
+
+Checking out a version
+`git checkout 2.0.0`
+
 Collaborate
 -----------
 
@@ -385,6 +461,9 @@ Show remote:
 
 Show remote details:
 `git remote -v`
+
+Inspecting a remote:
+`git remote show origin`
 
 Add remote upstream from GitHub project:
 `git remote add upstream https://github.com/user/project.git`
@@ -404,11 +483,17 @@ Merge fetched commits:
 Remove origin:
 `git remote rm origin`
 
+Rename origin:
+`git remote rename origin o2`
+
 Show remote branches:
 `git branch -r`
 
 Show all branches (remote and local):
 `git branch -a`
+
+Setting upstream branch, for current branch:
+`git branch -u origin/serverfix`
 
 Create and checkout branch from a remote branch:
 `git checkout -b local_branchname upstream/remote_branchname`
